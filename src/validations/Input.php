@@ -9,7 +9,6 @@ namespace Vanier\Api\Validations;
 class Input
 {
 
-
     public static function isAlpha($value)
     {
         $value = filter_var(trim($value), FILTER_SANITIZE_ADD_SLASHES);
@@ -18,14 +17,25 @@ class Input
         }
         return false;
     }
-
-    public static function isEmpty($value)
+    
+    public static function isPaginated($filters)
     {
-        if (empty($value)) {
+        if (!isset($filters['page']) || !isset($filters['page_size'])) {
             return false;
-        } else {
-            return true;
         }
+    
+        if (!ctype_digit($filters['page']) || !ctype_digit($filters['page_size'])) {
+            return false;
+        }
+    
+        $page = intval($filters['page']);
+        $page_size = intval($filters['page_size']);
+    
+        if ($page <= 0 || $page_size <= 0) {
+            return false;
+        }
+    
+        return [$page, $page_size];
     }
 
     /**

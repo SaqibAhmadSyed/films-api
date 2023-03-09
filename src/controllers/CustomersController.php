@@ -30,5 +30,19 @@ class CustomersController
         return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
     }
 
+    public function getActorFilm(Request $request, Response $response, array $uri_args)
+    {
+        $customer_model = new CustomersModel();
+
+        $customer_id = $uri_args["customer_id"];
+        $data = $customer_model->getActorFilm($customer_id);
+
+        $json_data = json_encode($data); 
+
+        $response->getBody()->write($json_data);
+        
+        return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
+    }
+
 }
 

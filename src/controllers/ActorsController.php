@@ -39,11 +39,15 @@ class ActorsController
         $actors_data = $request->getParsedBody();
 
         //--check if request body is not empty
+        if (empty($actors_data)) {
+            throw new HttpNotFoundException($request, "Invalid data...NOT FOUND!"); 
+        }
         //--check if parsed body is a list/array
         if ($this->isValidActor($actors_data) == null){
             throw new HttpNotFoundException($request, "Invalid data...NOT FOUND!"); 
             
         }
+
         foreach ($actors_data as $key => $actor){
 
             //validate the data inputed in the db (string or number or formatted data)
@@ -72,7 +76,7 @@ class ActorsController
         $actor_model = new ActorsModel();
 
         $actor_id = $uri_args["actor_id"];
-        $data = $actor_model->getActorFilm($actor_id);
+        $data = $actor_model->getActorFilms($actor_id);
 
         $json_data = json_encode($data); 
 

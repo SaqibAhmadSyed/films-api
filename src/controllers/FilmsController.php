@@ -4,6 +4,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpNotFoundException;
 use Vanier\Api\Models\FilmsModel;
+use Vanier\Api\Validations\Input;
 
 class FilmsController
 {
@@ -14,12 +15,19 @@ class FilmsController
     
     
     public function getAllFilms(Request $request, Response $response) {     
-        //throw new HttpNotFoundException($request, "Invalid data...NOT FOUND!");    
+            
         //-- filter by title
         $filters = $request->getQueryParams();
+
         //-- fetch list of films
-        $film_model = new  FilmsModel();
-        //$film_model->setPaginationOptions($filters["page"], $filters["page_size"]);
+        $film_model = new FilmsModel();
+        $validation = new Input();
+
+        if (!$validation->isPaginated($filters)) {
+            throw new HttpNotFoundException($request, "Invalid data...NOT FOUND!");
+        } else {
+            $film_model->setPaginationOptions($filters["page"], $filters["page_size"]);
+        }
 
         $data = $film_model->getAll($filters);
         $json_data = json_encode($data); 
