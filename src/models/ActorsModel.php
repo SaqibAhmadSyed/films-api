@@ -15,24 +15,24 @@ class ActorsModel extends BaseModel {
     public function getAll(array $filters = []) {
         $query_value = [];
         //-- Queries the db and returns the list of all films 
-        $sql = "SELECT * FROM $this->table_name WHERE 1=1";
+        $sql = "SELECT * FROM $this->table_name";
         //-- Verifies the filtering operations
-        if (isset($filters["title"])) {
-            $sql .= " AND title LIKE CONCAT('%', :title, '%')";
-            $query_params[':title'] = $filters['title'];
-        }     
-        if (isset($filters["descr"])){
-            $sql .= "AND description LIKE CONCAT(:description,'%')";
-            $query_value[":description"] = $filters["descr"];
-        }
-        if (isset($filters["special_ft"])){
-            $sql .= "AND special_features LIKE CONCAT(:special_features,'%')";
-            $query_value[":special_features"] = $filters["special_ft"];
-        }
-        if (isset($filters["rating"])){
-            $sql .= "AND rating LIKE CONCAT(:rating,'%')";
-            $query_value[":rating"] = $filters["rating"];
-        }
+        // if (isset($filters["title"])) {
+        //     $sql .= " AND title LIKE CONCAT('%', :title, '%')";
+        //     $query_params[':title'] = $filters['title'];
+        // }     
+        // if (isset($filters["descr"])){
+        //     $sql .= "AND description LIKE CONCAT(:description,'%')";
+        //     $query_value[":description"] = $filters["descr"];
+        // }
+        // if (isset($filters["special_ft"])){
+        //     $sql .= "AND special_features LIKE CONCAT(:special_features,'%')";
+        //     $query_value[":special_features"] = $filters["special_ft"];
+        // }
+        // if (isset($filters["rating"])){
+        //     $sql .= "AND rating LIKE CONCAT(:rating,'%')";
+        //     $query_value[":rating"] = $filters["rating"];
+        // }
         
         return $this->run($sql, $query_value)->fetchAll();
     }

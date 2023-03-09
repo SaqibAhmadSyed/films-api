@@ -16,7 +16,6 @@ class HttpNotAcceptableException extends HttpSpecializedException
      */
 
     protected $message = 'Not acceptable.';
-
     protected $title = '406 Not Acceptable';
     protected $description = 'the server cannot produce a response matching the list of acceptable values.';
 

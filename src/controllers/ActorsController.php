@@ -4,7 +4,6 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpNotFoundException;
 use Vanier\Api\Models\ActorsModel;
-use Vanier\Api\Validations;
 use Vanier\Api\Validations\Input;
 
 class ActorsController
@@ -19,19 +18,23 @@ class ActorsController
         //-- filter by title
         $filters = $request->getQueryParams();
 
-        $actor_model = new  ActorsModel();
+        $actor_model = new ActorsModel();
         //$film_model->setPaginationOptions($filters["page"], $filters["page_size"]);
 
         $data = $actor_model->getAll($filters);
         $json_data = json_encode($data); 
 
         //-- We need to prepare the response...
-        //$response->getBody()->write('List of all films');
         $response->getBody()->write($json_data);
 
         return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
     }
     
+
+    //-- ROUTE: PUT /actors
+    public function handleUpdateActors(Request $request, Response $response) {     
+        return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
+    }
     public function handleCreateActors(Request $request, Response $response) {     
         $actor_model = new ActorsModel();
         
@@ -43,20 +46,19 @@ class ActorsController
             throw new HttpNotFoundException($request, "Invalid data...NOT FOUND!"); 
         }
         //--check if parsed body is a list/array
-        if ($this->isValidActor($actors_data) == null){
+        if (!is_array($actors_data)){
             throw new HttpNotFoundException($request, "Invalid data...NOT FOUND!"); 
-            
         }
 
         foreach ($actors_data as $key => $actor){
-
             //validate the data inputed in the db (string or number or formatted data)
-            if ($this->isValidActor($actor)) {
-                $actor_model->createActors($actors_data);
-            } else {
-                echo "not valid data";
-            }
+            // var_dump($key);
+            // var_dump($actor);
+            // $actors = [$key => $actor];
+
+            //$actor_model->createActors($actors_data);
         }
+        $actor_model->createActors($actors_data);
         return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
     }
 
@@ -88,11 +90,6 @@ class ActorsController
     public function isValidActor($actor)
     {
         //validate firstname/lastname (not empty and [a-zA-Z])
-        $validator = new Input();
-
-        if (!$validator->isEmpty($actor)) {
-            echo ("cannot be empty");
-        }
     }
 }
 

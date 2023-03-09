@@ -36,10 +36,12 @@ $app->setBasePath("/films-api");
 $app->get('/films', [FilmsController::class, 'getAllFilms']);
 $app->get('/films/{film_id}', [FilmsController::class, 'getFilmById']);
 //--Actor routing
-$app->get('/actors', [ActorsController::class, 'handleGetActors']);
+$app->get('/actors', [ActorsController::class, 'getActors']);
 $app->get('/actors/{actor_id}', [ActorsController::class, 'getActorbyId']);
 $app->get('/actors/{actor_id}/films', [ActorsController::class, 'getActorFilm']);
-$app->put('/actors', [ActorsController::class, 'handleCreateActors']);
+// Create actor(s).
+$app->post('/actors', [ActorsController::class, 'handleCreateActors']);
+$app->put('/actors', [ActorsController::class, 'handleUpdateActors']);
 //--Customer routing
 $app->get('/customers', [CustomersController::class, 'getAllCustomers']);
 $app->get('/customers/{customer_id}/films', [CustomersController::class, 'getCustomerFilms']);

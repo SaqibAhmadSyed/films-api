@@ -24,7 +24,8 @@ class FilmsController
         $validation = new Input();
 
         if (!$validation->isPaginated($filters)) {
-            throw new HttpNotFoundException($request, "Invalid data...NOT FOUND!");
+            // throw new HttpNotFoundException($request, "Invalid data...NOT FOUND!");
+            $film_model->setPaginationOptions(1, 6);
         } else {
             $film_model->setPaginationOptions($filters["page"], $filters["page_size"]);
         }

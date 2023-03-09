@@ -20,7 +20,7 @@ class Input
     
     public static function isPaginated($filters)
     {
-        if (!isset($filters['page']) || !isset($filters['page_size'])) {
+        if (!isset($filters['page']) && !isset($filters['page_size'])) {
             return false;
         }
     
@@ -31,11 +31,11 @@ class Input
         $page = intval($filters['page']);
         $page_size = intval($filters['page_size']);
     
-        if ($page <= 0 || $page_size <= 0) {
+        if (intval($filters['page']) <= 0 || intval($filters['page_size']) <= 0) {
             return false;
         }
     
-        return [$page, $page_size];
+        return $filters;
     }
 
     /**
