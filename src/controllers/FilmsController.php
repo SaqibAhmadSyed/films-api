@@ -2,7 +2,9 @@
 namespace Vanier\Api\Controllers;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpNotFoundException;
+use Vanier\Api\Exceptions\HttpNotAcceptableException;
 use Vanier\Api\Models\FilmsModel;
 use Vanier\Api\Validations\Input;
 
@@ -23,12 +25,12 @@ class FilmsController
         $film_model = new FilmsModel();
         $validation = new Input();
 
-        if (!$validation->isPaginated($filters)) {
-            // throw new HttpNotFoundException($request, "Invalid data...NOT FOUND!");
-            $film_model->setPaginationOptions(1, 6);
-        } else {
-            $film_model->setPaginationOptions($filters["page"], $filters["page_size"]);
+        // checks if its a number and greater than 0
+        if (!$validation->isIntOrGreaterThan($filters["page"], 0) || !$validation->isIntOrGreaterThan($filters["page_size"], 0)) {
+            throw new HttpBadRequestException($request, "Invalid pagination input!");
         }
+
+        $film_model->setPaginationOptions($filters["page"], $filters["page_size"]);
 
         $data = $film_model->getAll($filters);
         $json_data = json_encode($data); 

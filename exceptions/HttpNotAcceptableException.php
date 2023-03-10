@@ -21,3 +21,4 @@ class HttpNotAcceptableException extends HttpSpecializedException
 
     protected $errorMessage = [$message, $title, $description];
 }
+?>

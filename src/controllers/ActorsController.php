@@ -3,6 +3,7 @@ namespace Vanier\Api\Controllers;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpNotFoundException;
+use Vanier\Api\Exceptions\HttpNotAcceptableException;
 use Vanier\Api\Models\ActorsModel;
 use Vanier\Api\Validations\Input;
 
@@ -35,6 +36,7 @@ class ActorsController
     public function handleUpdateActors(Request $request, Response $response) {     
         return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
     }
+    
     public function handleCreateActors(Request $request, Response $response) {     
         $actor_model = new ActorsModel();
         
@@ -43,7 +45,7 @@ class ActorsController
 
         //--check if request body is not empty
         if (empty($actors_data)) {
-            throw new HttpNotFoundException($request, "Invalid data...NOT FOUND!"); 
+            throw new HttpNotFoundException($request, "Invalid data...NOT FOUND!");
         }
         //--check if parsed body is a list/array
         if (!is_array($actors_data)){
@@ -52,13 +54,10 @@ class ActorsController
 
         foreach ($actors_data as $key => $actor){
             //validate the data inputed in the db (string or number or formatted data)
-            // var_dump($key);
-            // var_dump($actor);
-            // $actors = [$key => $actor];
 
-            //$actor_model->createActors($actors_data);
+            $actor_model->createActors($actors_data);
         }
-        $actor_model->createActors($actors_data);
+        
         return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
     }
 

@@ -17,25 +17,11 @@ class Input
         }
         return false;
     }
-    
-    public static function isPaginated($filters)
+
+    public static function isDigit($value)
     {
-        if (!isset($filters['page']) && !isset($filters['page_size'])) {
-            return false;
-        }
-    
-        if (!ctype_digit($filters['page']) || !ctype_digit($filters['page_size'])) {
-            return false;
-        }
-    
-        $page = intval($filters['page']);
-        $page_size = intval($filters['page_size']);
-    
-        if (intval($filters['page']) <= 0 || intval($filters['page_size']) <= 0) {
-            return false;
-        }
-    
-        return $filters;
+        $value = filter_var(trim($value), FILTER_SANITIZE_ADD_SLASHES);
+        return is_numeric($value) && !preg_match('/[^0-9]/', $value);
     }
 
     /**
@@ -66,10 +52,12 @@ class Input
 
         return filter_var($input, FILTER_VALIDATE_INT);
     }
+
     public static function getMinRangeOptions(int $min): array
     {
         return array("options" => array("min_range" => $min));
     }
+    
     public static function getRangeOptions(int $min, int $max): array
     {
         return array(
