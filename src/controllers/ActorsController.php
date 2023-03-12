@@ -3,32 +3,49 @@ namespace Vanier\Api\Controllers;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpNotFoundException;
-use Vanier\Api\Exceptions\HttpNotAcceptableException;
+use Slim\Exception\HttpBadRequestException;
 use Vanier\Api\Models\ActorsModel;
 use Vanier\Api\Validations\Input;
 
-class ActorsController
+class ActorsController extends BaseController
 {
+    private $actor_model;
+    private $validation;
+
     public function __construct() {
-        
+        $this->actor_model = new ActorsModel();
+        $this->validation = new Input();
     }
 
-    public function getActors(Request $request, Response $response)
+    /**
+     * Gets all the actor and puts in as json in the body
+     * @param Request $request
+     * @param Response $response
+     * 
+     * @return $response
+     */
+    public function getAllActors(Request $request, Response $response)
     {
-        //throw new HttpNotFoundException($request, "Invalid data...NOT FOUND!");    
-        //-- filter by title
         $filters = $request->getQueryParams();
 
-        $actor_model = new ActorsModel();
-        //$film_model->setPaginationOptions($filters["page"], $filters["page_size"]);
+        // checks if its a number and greater than 0
+        if (!$this->validation->isIntOrGreaterThan($filters["page"], 0) || !$this->validation->isIntOrGreaterThan($filters["page_size"], 0)) {
+            throw new HttpBadRequestException($request, "Invalid pagination input!");
+        }
 
-        $data = $actor_model->getAll($filters);
-        $json_data = json_encode($data); 
+        // Filters the value inside the foreach loops
+        foreach ($filters as $key => $value) {
+            if ($key !== 'page' && $key !== 'page_size') {
+                if (!$this->validation->isAlpha($value)) {
+                    throw new HttpBadRequestException($request, "Only string are accepted!");
+                }
+            }
+        }
 
-        //-- We need to prepare the response...
-        $response->getBody()->write($json_data);
-
-        return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
+        //sets up the pagination options by getting the value in the query params
+        $this->actor_model->setPaginationOptions($filters["page"], $filters["page_size"]);
+        $data =  $this->actor_model->getAll($filters);
+        return $this->prepResponse($request, $response, $data);
     }
     
 
@@ -37,6 +54,7 @@ class ActorsController
         return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
     }
     
+    //TODO: fix the create actor method
     public function handleCreateActors(Request $request, Response $response) {     
         $actor_model = new ActorsModel();
         
@@ -54,24 +72,21 @@ class ActorsController
 
         foreach ($actors_data as $key => $actor){
             //validate the data inputed in the db (string or number or formatted data)
-
-            $actor_model->createActors($actors_data);
+            var_dump($actors_data);
+            // $actor_model->createActors($actors_data);
         }
         
         return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
     }
 
-    public function getActorById(Request $request, Response $response, array $uri_args)
-    {
-        $actor_model = new ActorsModel();
-        $actor_id = $uri_args["actor_id"];
-        $data = $actor_model->getActorById($actor_id);
-        $json_data = json_encode($data);
-        
-        $response->getBody()->write($json_data);
-        return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
-    }
-
+    /**
+     * get all the film in which an actor was in it
+     * @param Request $request
+     * @param Response $response
+     * @param array $uri_args (actor_id)
+     * 
+     * @return $response
+     */
     public function getActorFilm(Request $request, Response $response, array $uri_args)
     {
         $actor_model = new ActorsModel();
@@ -84,11 +99,6 @@ class ActorsController
         $response->getBody()->write($json_data);
         
         return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
-    }
-
-    public function isValidActor($actor)
-    {
-        //validate firstname/lastname (not empty and [a-zA-Z])
     }
 }
 

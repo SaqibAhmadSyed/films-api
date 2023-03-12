@@ -4,6 +4,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 use Vanier\Api\Controllers\ActorsController;
+use Vanier\Api\Controllers\CategoriesController;
 use Vanier\Api\controllers\FilmsController;
 use Vanier\Api\controllers\CustomersController;
 use Vanier\Api\Validations\Validator;
@@ -36,7 +37,7 @@ $app->setBasePath("/films-api");
 $app->get('/films', [FilmsController::class, 'getAllFilms']);
 $app->get('/films/{film_id}', [FilmsController::class, 'getFilmById']);
 //--Actor routing
-$app->get('/actors', [ActorsController::class, 'getActors']);
+$app->get('/actors', [ActorsController::class, 'getAllActors']);
 $app->get('/actors/{actor_id}', [ActorsController::class, 'getActorbyId']);
 $app->get('/actors/{actor_id}/films', [ActorsController::class, 'getActorFilm']);
 // Create actor(s).
@@ -44,7 +45,9 @@ $app->post('/actors', [ActorsController::class, 'handleCreateActors']);
 $app->put('/actors', [ActorsController::class, 'handleUpdateActors']);
 //--Customer routing
 $app->get('/customers', [CustomersController::class, 'getAllCustomers']);
-$app->get('/customers/{customer_id}/films', [CustomersController::class, 'getCustomerFilms']);
+$app->get('/customers/{customer_id}/films', [CustomersController::class, 'getCustomerFilm']);
+//--Category routing
+$app->get('/categories/{category_id}/films', [CategoriesController::class, 'getCategoryFilm']);
 
 $app->get('/hello', function (Request $request, Response $response, $args) {
     $response->getBody()->write("Reporting! Hello there!");    

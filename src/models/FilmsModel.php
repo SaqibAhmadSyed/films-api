@@ -10,7 +10,12 @@ class FilmsModel extends BaseModel
         parent::__construct();
     }
 
-    //TODO: add filtering for language, category name, special feature and rating 
+    /**
+     * Gets all the values in the film table
+     * @param array $filters
+     * 
+     * @return
+     */
     public function getAll(array $filters = [])
     {
         $query_value = [];
@@ -19,32 +24,37 @@ class FilmsModel extends BaseModel
                 FROM film 
                 JOIN language ON film.language_id = language.language_id 
                 WHERE 1";
-    
+
         //-- Verifies the filtering operations
-        if (!empty($filters)) {
-            if (isset($filters["description"])) {
-                $sql .= " AND film.description LIKE CONCAT('%', :description,'%')";
-                $query_value[":description"] = $filters["description"];
-            }
-            if (isset($filters["title"])) {
-                $sql .= " AND film.title LIKE CONCAT('%', :title,'%')";
-                $query_value[":title"] = $filters["title"];
-            }
-            if (isset($filters["special_features"])) {
-                $sql .= " AND film.special_features LIKE CONCAT('%', :special_features,'%')";
-                $query_value[":special_features"] = $filters["special_features"];
-            }
-            if (isset($filters["rating"])) {
-                $sql .= " AND film.rating LIKE CONCAT('%', :rating,'%')";
-                $query_value[":rating"] = $filters["rating"];
-            }
-            if (isset($filters["language"])) {
-                $sql .= " AND film.language_id LIKE CONCAT('%', :language,'%')";
-                $query_value[":language"] = $filters["language"];
-            }
-            return $this->paginate($sql, $query_value);
+        if (isset($filters["description"])) {
+            $sql .= " AND film.description LIKE CONCAT('%', :description,'%')";
+            $query_value[":description"] = $filters["description"];
         }
+        if (isset($filters["title"])) {
+            $sql .= " AND film.title LIKE CONCAT('%', :title,'%')";
+            $query_value[":title"] = $filters["title"];
+        }
+        if (isset($filters["special_features"])) {
+            $sql .= " AND film.special_features LIKE CONCAT('%', :special_features,'%')";
+            $query_value[":special_features"] = $filters["special_features"];
+        }
+        if (isset($filters["rating"])) {
+            $sql .= " AND film.rating LIKE CONCAT('%', :rating,'%')";
+            $query_value[":rating"] = $filters["rating"];
+        }
+        if (isset($filters["language"])) {
+            $sql .= " AND language.name LIKE CONCAT('%', :language,'%')";
+            $query_value[":language"] = $filters["language"];
+        }
+        return $this->paginate($sql, $query_value);
     }
+
+    /**
+     * gets the film data by id
+     * @param int $film_id
+     * 
+     * @return 
+     */
     public function getFilmById(int $film_id)
     {
         $sql = "SELECT * FROM $this->table_name WHERE film_id = :film_id";

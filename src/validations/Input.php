@@ -9,6 +9,11 @@ namespace Vanier\Api\Validations;
 class Input
 {
 
+    /** checks if the iven value is a letter
+     * @param mixed $value
+     * 
+     * @return boolean
+     */
     public static function isAlpha($value)
     {
         $value = filter_var(trim($value), FILTER_SANITIZE_ADD_SLASHES);
@@ -18,12 +23,34 @@ class Input
         return false;
     }
 
-    public static function isDigit($value)
+    /**
+     * checks if the given value is in the array
+     * @param mixed $value
+     * @param mixed $array array to be compared
+     * 
+     * @return boolean
+     */
+    public static function isInArray($value, $array)
     {
-        $value = filter_var(trim($value), FILTER_SANITIZE_ADD_SLASHES);
-        return is_numeric($value) && !preg_match('/[^0-9]/', $value);
+        // prevents errors when upper case is typed instead of lower case
+        $value = strtoupper($value);
+        if (!in_array($value, $array)) {
+            return false;
+        }
+        return true;
     }
 
+    public static function stringContains(string $value, string $substring)
+    {
+        //need both of them to be lower case to compare
+        $value = strtolower($value);
+        $substring = strtolower($substring);
+
+        if (strpos($value, $substring) == false) {
+            return false;
+        }
+        return true;
+    }
     /**
      * Checks whether a value is int and is within a range.
      * @param mixed $value

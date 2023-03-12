@@ -12,37 +12,33 @@ class ActorsModel extends BaseModel {
     }
 
 
+    /**
+     * Gets al the value from actor database
+     * @param array $filters
+     * 
+     * @return 
+     */
     public function getAll(array $filters = []) {
-        $query_value = [];
-        //-- Queries the db and returns the list of all films 
-        $sql = "SELECT * FROM $this->table_name";
-        //-- Verifies the filtering operations
-        // if (isset($filters["title"])) {
-        //     $sql .= " AND title LIKE CONCAT('%', :title, '%')";
-        //     $query_params[':title'] = $filters['title'];
-        // }     
-        // if (isset($filters["descr"])){
-        //     $sql .= "AND description LIKE CONCAT(:description,'%')";
-        //     $query_value[":description"] = $filters["descr"];
-        // }
-        // if (isset($filters["special_ft"])){
-        //     $sql .= "AND special_features LIKE CONCAT(:special_features,'%')";
-        //     $query_value[":special_features"] = $filters["special_ft"];
-        // }
-        // if (isset($filters["rating"])){
-        //     $sql .= "AND rating LIKE CONCAT(:rating,'%')";
-        //     $query_value[":rating"] = $filters["rating"];
-        // }
+        $query_params = []; 
+        $sql = "SELECT * FROM $this->table_name WHERE 1";
         
-        return $this->run($sql, $query_value)->fetchAll();
+        if (isset($filters["first_name"])) {
+            $sql .= " AND first_name LIKE CONCAT(:first_name,'%')";
+            $query_params[':first_name'] = $filters['first_name'];
+        }     
+        if (isset($filters["last_name"])){
+            $sql .= " AND last_name LIKE CONCAT(:last_name,'%')";
+            $query_params[":last_name"] = $filters["last_name"];
+        }
+        return $this->paginate($sql, $query_params);
     }
 
-    public function getActorById(int $actor_id)
-    {
-        $sql = "SELECT * FROM $this->table_name WHERE actor_id = :actor_id";
-        return $this->run($sql, [":actor_id" => $actor_id])->fetchAll();
-    }
-
+    /**
+     * Gets all the films performed by an actor
+     * @param int $actor_id
+     * 
+     * @return 
+     */
     public function getActorFilms(int $actor_id)
     {
         $sql = "SELECT *
