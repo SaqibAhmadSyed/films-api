@@ -10,15 +10,16 @@ class CustomersModel extends BaseModel
         parent::__construct();
     }
 
-    /**
-     * Inserts the actor data in the table
-     * @param array $actor_data
+
+    /** query to update an already existing table
+     * @param array $cus_data
+     * @param array $cus_id
      * 
-     * @return [type]
+     * @return
      */
-    public function createActors(array $actor_data)
+    public function updateCustomer(array $cus_data, array $cus_id)
     {
-        return $this->insert($this->table_name, $actor_data);
+        $this->update($this->table_name, $cus_data, $cus_id);
     }
 
 

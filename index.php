@@ -34,20 +34,20 @@ $app->setBasePath("/films-api");
 // require_once __DIR__ . '/src/routes/api_routes.php';
 
 //--Film routing
-$app->get('/films', [FilmsController::class, 'getAllFilms']);
-$app->get('/films/{film_id}', [FilmsController::class, 'getFilmById']);
+$app->get('/films', [FilmsController::class, 'handleGetAllFilms']);
+$app->get('/films/{film_id}', [FilmsController::class, 'handleGetFilmById']);
+$app->post('/films', [FilmsController::class, 'handleCreateFilms']);
+$app->put('/films', [FilmsController::class, 'handleUpdateFilms']);
 //--Actor routing
-$app->get('/actors', [ActorsController::class, 'getAllActors']);
-$app->get('/actors/{actor_id}', [ActorsController::class, 'getActorbyId']);
-$app->get('/actors/{actor_id}/films', [ActorsController::class, 'getActorFilm']);
-// Create actor(s).
+$app->get('/actors', [ActorsController::class, 'handleGetAllActors']);
+$app->get('/actors/{actor_id}/films', [ActorsController::class, 'handleGetActorFilm']);
 $app->post('/actors', [ActorsController::class, 'handleCreateActors']);
-$app->put('/actors', [ActorsController::class, 'handleUpdateActors']);
 //--Customer routing
-$app->get('/customers', [CustomersController::class, 'getAllCustomers']);
-$app->get('/customers/{customer_id}/films', [CustomersController::class, 'getCustomerFilm']);
+$app->get('/customers', [CustomersController::class, 'handleGetAllCustomers']);
+$app->get('/customers/{customer_id}/films', [CustomersController::class, 'handleGetCustomerFilm']);
+$app->put('/customers', [CustomersController::class, 'handleUpdateCustomers']);
 //--Category routing
-$app->get('/categories/{category_id}/films', [CategoriesController::class, 'getCategoryFilm']);
+$app->get('/categories/{category_id}/films', [CategoriesController::class, 'handleGetCategoryFilm']);
 
 $app->get('/hello', function (Request $request, Response $response, $args) {
     $response->getBody()->write("Reporting! Hello there!");    

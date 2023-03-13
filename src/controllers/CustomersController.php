@@ -8,6 +8,9 @@ use Vanier\Api\Exceptions\HttpNotAcceptableException;
 use Vanier\Api\Models\CustomersModel;
 use Vanier\Api\Validations\Input;
 
+/**
+ * Manages all the data fetched from the model and manipulates it (CRUD operations) 
+ */
 class CustomersController extends BaseController
 {
     private $customer_model;
@@ -18,6 +21,32 @@ class CustomersController extends BaseController
         $this->validation = new Input();
     }
     
+    /**
+     * @param Request $request
+     * @param Response $response
+     * 
+     * @return $response
+     */
+    public function handleUpdateCustomers(Request $request, Response $response)
+    {
+        $cus_data = $request->getParsedBody();
+        //--check if request body is not empty and if parsed body is a list/array
+        if (empty($cus_data) || !is_array($cus_data)) {
+            throw new HttpBadRequestException($request, "Invalid/malformed data...BAD REQUEST!"); 
+        }
+        foreach ($cus_data as $data) {
+            //validates the input
+            $this->isValidCustomer($request, $data);
+            //gets the film id from the body
+            $cus_id = $data["customer_id"];
+            //unsets the film id in the whole data since the table is auto incrementing it
+            unset($data["customer_id"]);
+            //updates the data with the given data in the body and the id of the data we want to update
+            $this->customer_model->updateCustomer($data, ["customer_id" => $cus_id]);
+        }
+        echo "successfully updated!";
+        return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
+    }
 
     /**
      * Gets all the customer from the model and writes it in the body in json format
@@ -26,7 +55,7 @@ class CustomersController extends BaseController
      * 
      * @return $response
      */
-    public function getAllCustomers(Request $request, Response $response){     
+    public function handleGetAllCustomers(Request $request, Response $response){     
         
         $filters = $request->getQueryParams();
 
@@ -62,7 +91,7 @@ class CustomersController extends BaseController
      * 
      * @return $response
      */
-    public function getCustomerFilm(Request $request, Response $response, array $uri_args)
+    public function handleGetCustomerFilm(Request $request, Response $response, array $uri_args)
     {
         $filters = $request->getQueryParams();
         $this->customer_model->setPaginationOptions($filters["page"], $filters["page_size"]);
@@ -72,6 +101,48 @@ class CustomersController extends BaseController
         $data = $this->customer_model->getCustomerFilms($customer_id, $filters);
 
         return $this->prepResponse($request, $response, $data);
+    }
+
+    public function isValidCustomer($request, array $cus)
+    {
+        //gets all the row in films
+        foreach($cus as $key => $value) {
+            switch ($key) {
+                // each case is a key that we want to validate
+                case "customer_id":
+                case "store_id":
+                case "address_id":
+                    // check if the id is not a string
+                    if ($this->validation->isAlpha($value)) {
+                        throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
+                    }
+                    break;
+                case "active":
+                    // check if active is 0 or 1
+                    if (!$this->validation->isIntInRange($value, 0, 1)) {
+                        echo "nigmail";
+                        // throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
+                    }
+                    break;
+                case "language_id":
+                case "rental_duration":
+                case "length":
+                    // check if the given value is not alphabets
+                    if ($this->validation->isAlpha($value)) {
+                        throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
+                    }
+                    break;
+                case "first_name":
+                case "last_name":
+                    // check if the given string is a decimal
+                    if (!$this->validation->isAlpha($value)) {
+                        throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
 

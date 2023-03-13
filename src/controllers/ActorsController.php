@@ -1,5 +1,7 @@
 <?php
+
 namespace Vanier\Api\Controllers;
+
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpNotFoundException;
@@ -7,12 +9,16 @@ use Slim\Exception\HttpBadRequestException;
 use Vanier\Api\Models\ActorsModel;
 use Vanier\Api\Validations\Input;
 
+/**
+ * Manages all the data fetched from the model and manipulates it (CRUD operations) 
+ */
 class ActorsController extends BaseController
 {
     private $actor_model;
     private $validation;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->actor_model = new ActorsModel();
         $this->validation = new Input();
     }
@@ -24,15 +30,13 @@ class ActorsController extends BaseController
      * 
      * @return $response
      */
-    public function getAllActors(Request $request, Response $response)
+    public function handleGetAllActors(Request $request, Response $response)
     {
         $filters = $request->getQueryParams();
-
         // checks if its a number and greater than 0
         if (!$this->validation->isIntOrGreaterThan($filters["page"], 0) || !$this->validation->isIntOrGreaterThan($filters["page_size"], 0)) {
             throw new HttpBadRequestException($request, "Invalid pagination input!");
         }
-
         // Filters the value inside the foreach loops
         foreach ($filters as $key => $value) {
             if ($key !== 'page' && $key !== 'page_size') {
@@ -41,42 +45,33 @@ class ActorsController extends BaseController
                 }
             }
         }
-
         //sets up the pagination options by getting the value in the query params
         $this->actor_model->setPaginationOptions($filters["page"], $filters["page_size"]);
         $data =  $this->actor_model->getAll($filters);
         return $this->prepResponse($request, $response, $data);
     }
-    
 
-    //-- ROUTE: PUT /actors
-    public function handleUpdateActors(Request $request, Response $response) {     
-        return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
-    }
-    
-    //TODO: fix the create actor method
+    /** creates an actor that has been written in the body of the request
+     * @param Request $request
+     * @param Response $response
+     * 
+     * @return $response
+     */
     public function handleCreateActors(Request $request, Response $response) {     
-        $actor_model = new ActorsModel();
-        
         //step 1-- retrieve the data from the request body (getParseBodyMethod)
         $actors_data = $request->getParsedBody();
-
-        //--check if request body is not empty
-        if (empty($actors_data)) {
-            throw new HttpNotFoundException($request, "Invalid data...NOT FOUND!");
-        }
-        //--check if parsed body is a list/array
-        if (!is_array($actors_data)){
-            throw new HttpNotFoundException($request, "Invalid data...NOT FOUND!"); 
+        //--check if request body is not empty and if parsed body is a list/array
+        if (empty($actors_data) || !is_array($actors_data)) {
+            throw new HttpBadRequestException($request, "Invalid/malformed data...BAD REQUEST!"); 
         }
 
-        foreach ($actors_data as $key => $actor){
-            //validate the data inputed in the db (string or number or formatted data)
-            var_dump($actors_data);
-            // $actor_model->createActors($actors_data);
+        foreach ($actors_data as $actor){
+            $this->isValidActor($request, $actor);
+            // var_dump($actor);
+            $this->actor_model->createActors($actor);
         }
-        
-        return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
+        echo "successfully created!";
+        return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
     }
 
     /**
@@ -87,18 +82,42 @@ class ActorsController extends BaseController
      * 
      * @return $response
      */
-    public function getActorFilm(Request $request, Response $response, array $uri_args)
+    public function handleGetActorFilm(Request $request, Response $response, array $uri_args)
     {
         $actor_model = new ActorsModel();
-
         $actor_id = $uri_args["actor_id"];
         $data = $actor_model->getActorFilms($actor_id);
-
-        $json_data = json_encode($data); 
-
+        $json_data = json_encode($data);
         $response->getBody()->write($json_data);
-        
         return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
+    }
+
+    /**
+     * Checks if all the rows are properly inserted
+     * @param Request $request
+     * @param array $actor
+     * 
+     * @return 
+     */
+    public function isValidActor(Request $request, array $actor)
+    {
+        //validate firstname/lastname (not empty and [a-zA-Z])
+        foreach($actor as $key => $value) {
+            //reads the key to get the first and last name
+            if ($key == "first_name" || $key == "last_name") {
+                //check is the string associated with the key is only string
+                if (!$this->validation->isAlpha($value)) {
+                    throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
+                }
+            }
+            //reads the key to get the last update (turns out I didn't need this because of current_timestamp){
+            // if ($key == "last_update") {
+            //     //throws an exception if the inserted date is not following the standards
+            //     if (!$this->validation->isFormattedDate($value)) {
+            //         throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
+            //     }
+            // }
+        }
     }
 }
 

@@ -11,6 +11,29 @@ class FilmsModel extends BaseModel
     }
 
     /**
+     * query to update an already existing table
+     * @param array $film_data
+     * @param array $film_id
+     * 
+     * @return [type]
+     */
+    public function updateFilm(array $film_data, array $film_id)
+    {
+        $this->update($this->table_name, $film_data, $film_id);
+    }
+
+    /**
+     * query to insert film in the table
+     * @param array $film_data
+     * 
+     * @return 
+     */
+    public function createFilms(array $film_data)
+    {
+        return $this->insert($this->table_name, $film_data);
+    }
+
+    /**
      * Gets all the values in the film table
      * @param array $filters
      * 

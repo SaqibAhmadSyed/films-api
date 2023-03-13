@@ -5,6 +5,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpNotFoundException;
 use Vanier\Api\Models\CategoriesModel;
 
+/**
+ * Manages all the data fetched from the model and manipulates it (CRUD operations) 
+ */
 class CategoriesController extends BaseController
 {
     private $category_model;
@@ -21,7 +24,7 @@ class CategoriesController extends BaseController
      * 
      * @return $response
      */
-    public function getCategoryFilm(Request $request, Response $response, array $uri_args)
+    public function handleGetCategoryFilm(Request $request, Response $response, array $uri_args)
     {
         $category_id = $uri_args["category_id"];
         $data = $this->category_model->getCategoryFilms($category_id);

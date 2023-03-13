@@ -1,16 +1,26 @@
 <?php
+
 namespace Vanier\Api\Models;
 
-class ActorsModel extends BaseModel {
+class ActorsModel extends BaseModel
+{
     private $table_name = 'actor';
-    public function __construct() {
+
+    public function __construct()
+    {
         parent::__construct();
     }
 
-    public function createActors(array $actor_data) {
+    /**
+     * query to insert actor in the table
+     * @param array $actor_data
+     * 
+     * @return 
+     */
+    public function createActors(array $actor_data)
+    {
         return $this->insert($this->table_name, $actor_data);
     }
-
 
     /**
      * Gets al the value from actor database
@@ -18,15 +28,16 @@ class ActorsModel extends BaseModel {
      * 
      * @return 
      */
-    public function getAll(array $filters = []) {
-        $query_params = []; 
+    public function getAll(array $filters = [])
+    {
+        $query_params = [];
         $sql = "SELECT * FROM $this->table_name WHERE 1";
-        
+
         if (isset($filters["first_name"])) {
             $sql .= " AND first_name LIKE CONCAT(:first_name,'%')";
             $query_params[':first_name'] = $filters['first_name'];
-        }     
-        if (isset($filters["last_name"])){
+        }
+        if (isset($filters["last_name"])) {
             $sql .= " AND last_name LIKE CONCAT(:last_name,'%')";
             $query_params[":last_name"] = $filters["last_name"];
         }
