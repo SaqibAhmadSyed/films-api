@@ -21,6 +21,27 @@ class CustomersController extends BaseController
         $this->validation = new Input();
     }
     
+    /** delete the requested customer from the id fetched in the uri args
+     * @param Request $request
+     * @param Response $response
+     * 
+     * @return $response
+     */
+    public function handleDeleteCustomers(Request $request, Response $response, array $uri_args)
+    {
+        //gets the id from uri
+        $cus_id = $uri_args["customer_id"];
+        var_dump($cus_id);
+        //--check if uri args is not empty
+        if (empty($cus_id) || is_null($cus_id)) {
+            throw new HttpBadRequestException($request, "Invalid/malformed data...BAD REQUEST!"); 
+        }
+        //updates the data with the given data in the body and the id of the data we want to update
+        $this->customer_model->deleteCustomer($cus_id);
+        echo "successfully deleted id " . $cus_id;
+        return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
+    }
+
     /**
      * @param Request $request
      * @param Response $response
@@ -120,8 +141,7 @@ class CustomersController extends BaseController
                 case "active":
                     // check if active is 0 or 1
                     if (!$this->validation->isIntInRange($value, 0, 1)) {
-                        echo "nigmail";
-                        // throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
+                        throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
                     }
                     break;
                 case "language_id":
@@ -136,6 +156,12 @@ class CustomersController extends BaseController
                 case "last_name":
                     // check if the given string is a decimal
                     if (!$this->validation->isAlpha($value)) {
+                        throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
+                    }
+                    break;
+                case "email":
+                    // check if the email string according to the standards (first_name.last_name@sakilacustomer.org)
+                    if (!$this->validation->isEmail($value, $cus["first_name"], $cus["last_name"])) {
                         throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
                     }
                     break;

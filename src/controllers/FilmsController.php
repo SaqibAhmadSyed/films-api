@@ -24,6 +24,33 @@ class FilmsController extends BaseController
         $this->validation = new Input();
     }
 
+    /**
+     * Deleted the films by the id requested in the body
+     * @param Request $request
+     * @param Response $response
+     * 
+     * @return $response
+     */
+    public function handleDeleteFilms(Request $request, Response $response)
+    {
+        $films_data = $request->getParsedBody();
+        //--check if request body is not empty and if parsed body is a list/array
+        if (empty($films_data) || !is_array($films_data)) {
+            throw new HttpBadRequestException($request, "Invalid/malformed data...BAD REQUEST!");
+        }
+
+        foreach ($films_data as $data) {
+            //checks if the film exists
+            if (!$this->film_model->getFilmById($data)) {
+                throw new HttpBadRequestException($request, "Id does not exist...BAD REQUEST!");
+            }
+            //deletes the data with the given data in the body and the id of the data we want to delete
+            $this->film_model->deleteFilm($data);
+        }
+        echo "Successfuly deleted";
+        return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
+    }
+
     //-- ROUTE: PUT /films
     /**
      * Gets the data from the body, takes the id and updates the desired row.
@@ -37,7 +64,7 @@ class FilmsController extends BaseController
         $films_data = $request->getParsedBody();
         //--check if request body is not empty and if parsed body is a list/array
         if (empty($films_data) || !is_array($films_data)) {
-            throw new HttpBadRequestException($request, "Invalid/malformed data...BAD REQUEST!"); 
+            throw new HttpBadRequestException($request, "Invalid/malformed data...BAD REQUEST!");
         }
         foreach ($films_data as $data) {
             //validates the input
@@ -59,16 +86,17 @@ class FilmsController extends BaseController
      * 
      * @return $response
      */
-    public function handleCreateFilms(Request $request, Response $response) {     
+    public function handleCreateFilms(Request $request, Response $response)
+    {
 
         //step 1-- retrieve the data from the request body (getParseBodyMethod)
         $films_data = $request->getParsedBody();
         //--check if request body is not empty and if parsed body is a list/array
         if (empty($films_data) || !is_array($films_data)) {
-            throw new HttpBadRequestException($request, "Invalid/malformed data...BAD REQUEST!"); 
+            throw new HttpBadRequestException($request, "Invalid/malformed data...BAD REQUEST!");
         }
 
-        foreach ($films_data as $film){
+        foreach ($films_data as $film) {
             //validates the input
             $this->isValidFilm($request, $film);
             $this->film_model->createFilms($film);
@@ -126,7 +154,6 @@ class FilmsController extends BaseController
      */
     public function handleGetFilmById(Request $request, Response $response, array $uri_args)
     {
-        $film_model = new FilmsModel();
         $film_id = $uri_args["film_id"];
 
         // throws an exception if the id is a letter (isInt should work)
@@ -134,30 +161,42 @@ class FilmsController extends BaseController
             throw new HttpBadRequestException($request, "the ID should only be numbers");
         }
 
-        $data = $film_model->getFilmById($film_id);
+        $data = $this->film_model->getFilmById($film_id);
         return $this->prepResponse($request, $response, $data);
     }
 
     public function isValidFilm($request, array $film)
     {
         $rating_array = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
-        $special_feature_array = ['Trailers','Commentaries','Deleted Scenes','Behind the Scenes'];
+        $special_feature_array = ['Trailers', 'Commentaries', 'Deleted Scenes', 'Behind the Scenes'];
 
         //gets all the row in films
-        foreach($film as $key => $value) {
+        foreach ($film as $key => $value) {
             switch ($key) {
-                // each case is a key that we want to validate
+                    // each case is a key that we want to validate
                 case "film_id":
                     // check if the id is not a string
                     if ($this->validation->isAlpha($value)) {
                         throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
                     }
                     break;
-                // each case is a key that we want to validate
+                case "title":
+                    // check if the title is only strings
+                    if (!$this->validation->isOnlyAlpha($value)) {
+                        throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
+                    }
+                    if (empty($value)) {
+                        throw new HttpBadRequestException($request, "One or more data is empty...BAD REQUEST!");
+                    }
+                    break;
+                    // each case is a key that we want to validate
                 case "release_year":
                     // check if the year string is only numbers
                     if (!$this->validation->isInt($value)) {
                         throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
+                    }
+                    if (empty($value)) {
+                        throw new HttpBadRequestException($request, "One or more data is empty...BAD REQUEST!");
                     }
                     break;
                 case "language_id":
@@ -167,6 +206,9 @@ class FilmsController extends BaseController
                     if ($this->validation->isAlpha($value)) {
                         throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
                     }
+                    if (empty($value)) {
+                        throw new HttpBadRequestException($request, "One or more data is empty...BAD REQUEST!");
+                    }
                     break;
                 case "rental_rate":
                 case "replacement_cost":
@@ -174,16 +216,25 @@ class FilmsController extends BaseController
                     if (!$this->validation->isInDecimal($value)) {
                         throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
                     }
+                    if (empty($value)) {
+                        throw new HttpBadRequestException($request, "One or more data is empty...BAD REQUEST!");
+                    }
                     break;
                     //checks if rating/special_features contains the value from the enum/set
                 case "rating":
-                    if (!$this->validation->isInArray($value, $rating_array)) {      
-                            throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
+                    if (!$this->validation->isInArray($value, $rating_array)) {
+                        throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
+                    }
+                    if (empty($value)) {
+                        throw new HttpBadRequestException($request, "One or more data is empty...BAD REQUEST!");
                     }
                     break;
                 case "special_features":
-                    if (!$this->validation->isInArray($value, $special_feature_array)) {      
+                    if (!$this->validation->isInArray($value, $special_feature_array)) {
                         throw new HttpBadRequestException($request, "One or more data is malformed...BAD REQUEST!");
+                    }
+                    if (empty($value)) {
+                        throw new HttpBadRequestException($request, "One or more data is empty...BAD REQUEST!");
                     }
                     break;
                 default:

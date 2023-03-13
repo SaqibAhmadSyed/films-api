@@ -23,6 +23,18 @@ class FilmsModel extends BaseModel
     }
 
     /**
+     * query to delete an already existing table
+     * @param array $film_data
+     * @param mixed $film_id
+     * 
+     * @return [type]
+     */
+    public function deleteFilm($film_id)
+    {
+        $this->delete($this->table_name, ["film_id" =>$film_id]);
+    }
+
+    /**
      * query to insert film in the table
      * @param array $film_data
      * 

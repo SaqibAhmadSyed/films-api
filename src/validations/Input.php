@@ -119,10 +119,19 @@ class Input
         return DateTime::createFromFormat('Y-m-d H:i:s', $value);
     }
 
-    public static function isEmail($value)
+    public static function isEmail($value, string $first_name, string $last_name)
     {
-        $pattern = "/^[a-zA-Z]+\\.[a-zA-Z]+\\.[a-zA-Z]+@sakilacustomer\\.org$/";
-        return preg_match($pattern, $value) == 1;
+        $v = new Input();
+        
+        if (!$v->isAlpha($first_name)) {
+            return false;    
+        }
+        if (!$v->isAlpha($last_name)) {
+            return false;    
+        }
+
+        $email_name = $first_name . '.' . $last_name . '@sakilacustomer.org';
+        return filter_var($value, FILTER_VALIDATE_EMAIL) === $email_name;
     }
 
     /**

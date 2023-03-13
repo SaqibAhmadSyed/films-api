@@ -22,6 +22,16 @@ class CustomersModel extends BaseModel
         $this->update($this->table_name, $cus_data, $cus_id);
     }
 
+    /** query to delete an already existing table
+     * @param array $cus_data
+     * @param array $cus_id
+     * 
+     * @return
+     */
+    public function deleteCustomer($cus_id)
+    {
+        $this->delete($this->table_name, ['customer_id' => $cus_id]);
+    }
 
     /**
      * Writes the query to get information regarding all the customers
@@ -90,10 +100,6 @@ class CustomersModel extends BaseModel
         if (isset($filters["rating"])) {
             $sql .= " AND film.rating LIKE CONCAT('%', :rating,'%')";
             $query_value[":rating"] = $filters["rating"];
-        }
-        if (isset($filters["special_feautres"])) {
-            $sql .= " AND film.special_feautres LIKE CONCAT('%', :special_feautres,'%')";
-            $query_value[":special_feautres"] = $filters["special_feautres"];
         }
         return $this->paginate($sql, $query_value);
     }
