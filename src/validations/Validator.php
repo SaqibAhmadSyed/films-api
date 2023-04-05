@@ -1,7 +1,5 @@
 <?php
 
-require_once("validations/Validator.php");
-
 namespace Vanier\Api\Validations;
 
 /**

@@ -2,6 +2,7 @@
 
 namespace Vanier\Api\Controllers;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpBadRequestException;
@@ -101,8 +102,15 @@ class FilmsController extends BaseController
             $this->isValidFilm($request, $film);
             $this->film_model->createFilms($film);
         }
-        echo "successfully created!";
-        return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
+        $success_data = [
+            "code" => StatusCodeInterface::STATUS_CREATED,
+            "message" => "Created", 
+            "description" => "The film was created successfully!"
+        ];
+
+        //echo "successfully created!";
+        //return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
+        return $this->prepResponse($request, $response, $success_data, 201);
     }
 
     /**
@@ -117,10 +125,15 @@ class FilmsController extends BaseController
 
         $filters = $request->getQueryParams();
         $rating_array = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
-        // checks if its a number and greater than 0
-        if (!$this->validation->isIntOrGreaterThan($filters["page"], 0) || !$this->validation->isIntOrGreaterThan($filters["page_size"], 0)) {
-            throw new HttpBadRequestException($request, "Invalid pagination input!");
+        if ($this->isValidPageParams($filters)) {
+            //sets up the pagination options by getting the value in the query params
+            // WE set only if we have valid ....
+            $this->film_model->setPaginationOptions($filters["page"], $filters["page_size"]);
         }
+        // checks if its a number and greater than 0
+        // if (!$this->validation->isIntOrGreaterThan($filters["page"], 0) || !$this->validation->isIntOrGreaterThan($filters["page_size"], 0)) {
+        //  ///   throw new HttpBadRequestException($request, "Invalid pagination input!");
+        // }
         // stores in filter_params all the filters that are not pagination filters for validation
         // Filters the value inside the foreach loops
         $filter_params = [];
@@ -135,9 +148,6 @@ class FilmsController extends BaseController
                 $filter_params[$key] = $value;
             }
         }
-
-        //sets up the pagination options by getting the value in the query params
-        $this->film_model->setPaginationOptions($filters["page"], $filters["page_size"]);
 
         $data =  $this->film_model->getAll($filter_params);
 
